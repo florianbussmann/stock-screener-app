@@ -1,6 +1,7 @@
 # stock-screener-app
 
 ![Start](docs/images/screenshot.png)
+![Search NVIDIA](docs/images/search-nvidia.png)
 
 ## Developing
 
