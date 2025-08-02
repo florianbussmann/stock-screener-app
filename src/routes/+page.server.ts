@@ -1,4 +1,4 @@
-import yahooFinance from 'yahoo-finance2';
+import { yahooFinance } from "$lib/yahoo";
 
 export async function load({ }) {
     const queryOptions = { count: 10, region: 'US' };

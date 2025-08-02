@@ -1,4 +1,4 @@
-import yahooFinance from 'yahoo-finance2';
+import { yahooFinance } from "$lib/yahoo";
 
 export async function load({ params }) {
     const symbol = params.stock;
