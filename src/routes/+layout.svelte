@@ -7,7 +7,6 @@
 
 	let { children } = $props();
 
-	let searchOpen = $state(false);
 	let search = $state("");
 	let searchPromise = $derived.by(() => {
 		return fetchResults(search);
@@ -32,7 +31,7 @@
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
 			e.preventDefault();
-			searchOpen = !searchOpen;
+			searchOpen.update((value) => !value);
 		}
 	}
 
@@ -41,6 +40,7 @@
 	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
 	import AppSidebar from "$lib/components/app-sidebar.svelte";
 	import SiteHeader from "$lib/components/site-header.svelte";
+	import { searchOpen } from "$lib/stores/search";
 </script>
 
 <svelte:head>
@@ -69,7 +69,7 @@
 
 <svelte:document onkeydown={handleKeydown} />
 
-<Command.Dialog bind:open={searchOpen}>
+<Command.Dialog bind:open={$searchOpen}>
 	<Command.Input bind:value={search} placeholder="Type to search..." />
 	<Command.List>
 		{#await searchPromise}

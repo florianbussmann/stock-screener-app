@@ -4,6 +4,8 @@
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
     import { Kbd } from "$lib/components/ui/kbd";
     import CommandIcon from "@lucide/svelte/icons/command";
+
+    import { searchOpen } from "$lib/stores/search";
 </script>
 
 <header
@@ -17,7 +19,7 @@
         />
 
         <div class="ml-auto flex items-center gap-2">
-            <Button variant="secondary"
+            <Button variant="secondary" onclick={() => searchOpen.set(true)}
                 >Search stocks using
 
                 <Kbd>
