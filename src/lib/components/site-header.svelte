@@ -1,6 +1,11 @@
 <script lang="ts">
+    import { Button } from "$lib/components/ui/button/index.js";
     import { Separator } from "$lib/components/ui/separator/index.js";
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+    import { Kbd } from "$lib/components/ui/kbd";
+    import CommandIcon from "@lucide/svelte/icons/command";
+
+    import { searchOpen } from "$lib/stores/search";
 </script>
 
 <header
@@ -12,5 +17,16 @@
             orientation="vertical"
             class="mx-2 data-[orientation=vertical]:h-4"
         />
+
+        <div class="ml-auto flex items-center gap-2">
+            <Button variant="secondary" onclick={() => searchOpen.set(true)}
+                >Search stocks using
+
+                <Kbd>
+                    <CommandIcon class="inline size-4" />
+                    + K
+                </Kbd>
+            </Button>
+        </div>
     </div>
 </header>
