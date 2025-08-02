@@ -4,6 +4,7 @@
 	import * as Command from "$lib/components/ui/command/index.js";
 	import "../app.css";
 	import favicon from "$lib/assets/favicon.svg";
+	import BookMarkedIcon from "@lucide/svelte/icons/book-marked";
 
 	import { pwaInfo } from "virtual:pwa-info";
 
@@ -43,6 +44,8 @@
 	import AppSidebar from "$lib/components/app-sidebar.svelte";
 	import SiteHeader from "$lib/components/site-header.svelte";
 	import { searchOpen } from "$lib/stores/search";
+
+	import { isInWatchlist } from "$lib/stores/watchlist";
 </script>
 
 <svelte:head>
@@ -81,6 +84,7 @@
 			<Command.Group>
 				{#each quotes as quote}
 					<Command.Item
+						class="flex justify-between items-center"
 						onclick={() => {
 							searchOpen.set(false);
 							goto(`/stocks/${quote.symbol}`);
@@ -92,7 +96,15 @@
 							<span class="text-sm text-muted-foreground">
 								{quote.longname}
 							</span>
-						</div></Command.Item
+						</div>
+						{#if isInWatchlist(quote.symbol)}
+							<div
+								class="flex items-center gap-1 text-sm font-medium"
+							>
+								<BookMarkedIcon />
+								<span>Watching</span>
+							</div>
+						{/if}</Command.Item
 					>
 				{/each}
 			</Command.Group>
