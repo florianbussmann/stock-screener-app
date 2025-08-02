@@ -35,8 +35,14 @@
             color: "#0ea5e9",
             lineWidth: 2,
         });
-
         series.setData(data.chartData);
+        
+        const smaSeries = chart.addSeries(LineSeries);
+        smaSeries.applyOptions({
+            color: "red",
+            lineWidth: 2,
+        });
+        smaSeries.setData(data.smaData);
 
         const resizeObserver = new ResizeObserver(() => {
             chart.applyOptions({ width: chartContainer?.clientWidth });
