@@ -2,7 +2,11 @@
 	import "../app.css";
 	import favicon from "$lib/assets/favicon.svg";
 
+	import { pwaInfo } from "virtual:pwa-info";
+
 	let { children } = $props();
+
+	const webManifestLink = pwaInfo ? pwaInfo.webManifest.linkTag : "";
 
 	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
 	import AppSidebar from "$lib/components/app-sidebar.svelte";
@@ -11,6 +15,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	{@html webManifestLink}
 </svelte:head>
 
 <Sidebar.Provider
