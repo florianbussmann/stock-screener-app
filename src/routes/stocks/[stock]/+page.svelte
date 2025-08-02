@@ -8,21 +8,12 @@
         }).format(value);
 
     let { data } = $props();
-
-    const mandata = {
-        price: "205.06 USD",
-        change: "+2.35 USD",
-        changePercent: "+1.32 %",
-        ticker: "AAPL",
-        isin: "US0378331005",
-        wkn: "865985",
-    };
 </script>
 
 {#if data.stockData}
     <div class="text-center mb-6">
         <h1 class="text-3xl font-bold">
-            {data.stockData.displayName} ({data.props.symbol})
+            {data.stockData.displayName || data.stockData.longName} ({data.props.symbol})
         </h1>
         <p class="text-muted-foreground">Stock Overview</p>
     </div>

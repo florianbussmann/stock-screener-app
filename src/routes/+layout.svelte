@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from "$app/navigation";
+
 	import * as Command from "$lib/components/ui/command/index.js";
 	import "../app.css";
 	import favicon from "$lib/assets/favicon.svg";
@@ -78,7 +80,13 @@
 			<Command.Empty>No results found.</Command.Empty>
 			<Command.Group>
 				{#each quotes as quote}
-					<Command.Item value={quote.symbol + " " + quote.shortname}>
+					<Command.Item
+						onclick={() => {
+							searchOpen.set(false);
+							goto(`/stocks/${quote.symbol}`);
+						}}
+						value={quote.symbol + " " + quote.shortname}
+					>
 						<div class="flex flex-col">
 							<span class="font-semibold">{quote.symbol}</span>
 							<span class="text-sm text-muted-foreground">
