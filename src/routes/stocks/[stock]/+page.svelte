@@ -2,6 +2,12 @@
     import * as Card from "$lib/components/ui/card/index.js";
     import { onMount } from "svelte";
     import { createChart, LineSeries } from "lightweight-charts";
+    import { Button } from "$lib/components/ui/button";
+    import PlusIcon from "@lucide/svelte/icons/plus";
+    import {
+        addToWatchlist,
+        isInWatchlist,
+    } from "$lib/stores/watchlist";
 
     const formatPercent = (value: number) => formatChange(value) + " %";
     const formatChange = (value: number) =>
@@ -12,6 +18,7 @@
         }).format(value);
 
     let { data } = $props();
+    let watched = $state(false);
 
     let chartContainer: HTMLDivElement | undefined = $state();
 
@@ -48,6 +55,7 @@
         $effect(() => {
             series.setData(data.chartData);
             smaSeries.setData(data.smaData);
+            watched = isInWatchlist(data.props?.symbol);
         });
 
         const resizeObserver = new ResizeObserver(() => {
@@ -63,12 +71,25 @@
 </script>
 
 {#if data.stockData}
-    <Card.Root>
-        <Card.Header>
-            <Card.Title>Stock overview</Card.Title>
-            <Card.Description
-                >{data.stockData.displayName || data.stockData.longName} ({data
-                    .props.symbol})</Card.Description
+    <Card.Root
+        ><Card.Header class="flex items-start justify-between">
+            <div class="flex flex-col">
+                <Card.Title>Stock overview</Card.Title>
+                <Card.Description>
+                    {data.stockData.displayName || data.stockData.longName} ({data
+                        .props.symbol})
+                </Card.Description>
+            </div>
+
+            <Button
+                size="sm"
+                onclick={() => {
+                    addToWatchlist(data.props?.symbol);
+                    watched = true;
+                }}
+                disabled={watched}
+            >
+                <PlusIcon class="w-4 h-4" />Watch</Button
             >
         </Card.Header>
         <Card.Content>
