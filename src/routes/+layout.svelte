@@ -6,6 +6,8 @@
 	import favicon from "$lib/assets/favicon.svg";
 	import BookMarkedIcon from "@lucide/svelte/icons/book-marked";
 
+	import { watchlist } from "$lib/stores/watchlist";
+
 	import { pwaInfo } from "virtual:pwa-info";
 
 	let { children } = $props();
@@ -81,6 +83,16 @@
 			<Command.Empty>Searching..</Command.Empty>
 		{:then quotes}
 			<Command.Empty>No results found.</Command.Empty>
+			{#if search === '' && $watchlist.length > 0}
+				<Command.Group heading="Watchlist">
+					{#each $watchlist as symbol}
+						<Command.Item onclick={() => {
+							searchOpen.set(false);
+							goto(`/stocks/${symbol}`);
+						}}>{symbol}</Command.Item>
+					{/each}
+				</Command.Group>
+			{:else}
 			<Command.Group>
 				{#each quotes as quote}
 					<Command.Item
@@ -108,6 +120,7 @@
 					>
 				{/each}
 			</Command.Group>
+			{/if}
 		{:catch error}
 			<p style="color: red">{error.message}</p>
 		{/await}
