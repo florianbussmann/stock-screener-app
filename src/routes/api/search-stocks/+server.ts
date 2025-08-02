@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import yahooFinance from 'yahoo-finance2';
+import { yahooFinance } from "$lib/yahoo";
 
 export async function GET({ url }) {
     const query = url.searchParams.get('q');
