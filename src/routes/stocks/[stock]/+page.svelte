@@ -30,13 +30,13 @@
                 horzLines: { color: "#e2e8f0" },
             },
         });
+
         const series = chart.addSeries(LineSeries);
         series.applyOptions({
             color: "#0ea5e9",
             lineWidth: 2,
             title: "Close",
         });
-        series.setData(data.chartData);
 
         const smaSeries = chart.addSeries(LineSeries);
         smaSeries.applyOptions({
@@ -44,7 +44,11 @@
             lineWidth: 2,
             title: "SMA200",
         });
-        smaSeries.setData(data.smaData);
+
+        $effect(() => {
+            series.setData(data.chartData);
+            smaSeries.setData(data.smaData);
+        });
 
         const resizeObserver = new ResizeObserver(() => {
             chart.applyOptions({ width: chartContainer?.clientWidth });
