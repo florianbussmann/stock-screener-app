@@ -1,5 +1,7 @@
 # stock-screener-app
 
+![Start](docs/images/screenshot.png)
+
 ## Developing
 
 Once you've installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
