@@ -34,13 +34,15 @@
         series.applyOptions({
             color: "#0ea5e9",
             lineWidth: 2,
+            title: "Close",
         });
         series.setData(data.chartData);
-        
+
         const smaSeries = chart.addSeries(LineSeries);
         smaSeries.applyOptions({
             color: "red",
             lineWidth: 2,
+            title: "SMA200",
         });
         smaSeries.setData(data.smaData);
 
