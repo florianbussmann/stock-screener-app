@@ -1,4 +1,5 @@
 import { yahooFinance } from "$lib/yahoo";
+import { RSI } from 'technicalindicators';
 
 function calculateSMA(data: {
     time: string; value: number
@@ -20,6 +21,22 @@ function calculateSMA(data: {
     }
 
     return sma;
+}
+
+function calculateRSI(chartData: any, period: number) {
+  const closes = chartData.map((point: { time: string, value: number; }) => point.value);
+
+  const rsiValues = RSI.calculate({ period, values: closes });
+
+  const rsiChartData = rsiValues.map((rsi, idx) => {
+    const time = chartData[idx + period].time;
+    return {
+      time,
+      value: parseFloat(rsi.toFixed(2)),
+    };
+  });
+
+  return rsiChartData;
 }
 
 export async function load({ params }) {
@@ -46,6 +63,7 @@ export async function load({ params }) {
                 value: q.close!,                         // or q.adjclose if you prefer
             }));
         const smaData = calculateSMA(chartData, 200);
+        const rsiData = calculateRSI(chartData, 14);
 
         return {
             props: {
@@ -54,6 +72,7 @@ export async function load({ params }) {
             stockData: quote,
             chartData: chartData,
             smaData: smaData,
+            rsiData: rsiData,
         };
     } catch (error) {
         console.error(error);
@@ -64,6 +83,7 @@ export async function load({ params }) {
             stockData: undefined,
             chartData: [],
             smaData: [],
+            rsiData: [],
             error: 'Failed to fetch stock data.'
         };
     }
