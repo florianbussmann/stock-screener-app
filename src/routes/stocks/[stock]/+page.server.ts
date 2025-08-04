@@ -1,42 +1,36 @@
 import { yahooFinance } from "$lib/yahoo";
-import { RSI } from 'technicalindicators';
+import { RSI, SMA } from 'technicalindicators';
 
-function calculateSMA(data: {
-    time: string; value: number
-}[], windowSize: number) {
-    const sma = [];
-    let sum = 0;
+function calculateSMA(chartData: any, period: number) {
+    const closes = chartData.map((point: { time: string, value: number; }) => point.value);
 
-    for (let i = 0; i < data.length; i++) {
-        sum += data[i].value;
-        if (i >= windowSize - 1) {
-            if (i >= windowSize) {
-                sum -= data[i - windowSize].value;
-            }
-            sma.push({
-                time: data[i].time,
-                value: sum / windowSize,
-            });
-        }
-    }
+    const smaValues = SMA.calculate({ period: period, values: closes });
 
-    return sma;
+    const smaChartData = smaValues.map((sma, idx) => {
+        const time = chartData[idx + period - 1].time;
+        return {
+            time,
+            value: parseFloat(sma.toFixed(2)),
+        };
+    });
+
+    return smaChartData;
 }
 
 function calculateRSI(chartData: any, period: number) {
-  const closes = chartData.map((point: { time: string, value: number; }) => point.value);
+    const closes = chartData.map((point: { time: string, value: number; }) => point.value);
 
-  const rsiValues = RSI.calculate({ period, values: closes });
+    const rsiValues = RSI.calculate({ period: period, values: closes });
 
-  const rsiChartData = rsiValues.map((rsi, idx) => {
-    const time = chartData[idx + period].time;
-    return {
-      time,
-      value: parseFloat(rsi.toFixed(2)),
-    };
-  });
+    const rsiChartData = rsiValues.map((rsi, idx) => {
+        const time = chartData[idx + period].time;
+        return {
+            time,
+            value: parseFloat(rsi.toFixed(2)),
+        };
+    });
 
-  return rsiChartData;
+    return rsiChartData;
 }
 
 export async function load({ params }) {
@@ -63,6 +57,7 @@ export async function load({ params }) {
                 value: q.close!,                         // or q.adjclose if you prefer
             }));
         const smaData = calculateSMA(chartData, 200);
+        // const smaData = SMA.calculate(chartData);
         const rsiData = calculateRSI(chartData, 14);
 
         return {
