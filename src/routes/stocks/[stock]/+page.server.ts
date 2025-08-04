@@ -1,25 +1,28 @@
 import { yahooFinance } from "$lib/yahoo";
+import { RSI, SMA } from 'technicalindicators';
+import type { Indicator } from "technicalindicators/declarations/indicator/indicator.js";
 
-function calculateSMA(data: {
-    time: string; value: number
-}[], windowSize: number) {
-    const sma = [];
-    let sum = 0;
+function alignIndicatorToTime(indicatorValues: number[], chartData: any, offset: number) {
+    return indicatorValues.map((value: number, idx: number) => ({
+        time: chartData[idx + offset].time,
+        value: parseFloat(value.toFixed(2)),
+    }));
+}
 
-    for (let i = 0; i < data.length; i++) {
-        sum += data[i].value;
-        if (i >= windowSize - 1) {
-            if (i >= windowSize) {
-                sum -= data[i - windowSize].value;
-            }
-            sma.push({
-                time: data[i].time,
-                value: sum / windowSize,
-            });
-        }
-    }
+function calculateIndicator(indicator: typeof Indicator, chartData: any, period: number, offset: number = period) {
+    const closes = chartData.map((point: { time: string, value: number; }) => point.value);
 
-    return sma;
+    const indicatorValues = indicator.calculate({ period: period, values: closes });
+
+    return alignIndicatorToTime(indicatorValues, chartData, offset);
+}
+
+function calculateSMA(chartData: any, period: number) {
+    return calculateIndicator(SMA, chartData, period, period - 1);
+}
+
+function calculateRSI(chartData: any, period: number) {
+    return calculateIndicator(RSI, chartData, period);
 }
 
 export async function load({ params }) {
@@ -46,6 +49,7 @@ export async function load({ params }) {
                 value: q.close!,                         // or q.adjclose if you prefer
             }));
         const smaData = calculateSMA(chartData, 200);
+        const rsiData = calculateRSI(chartData, 14);
 
         return {
             props: {
@@ -54,6 +58,7 @@ export async function load({ params }) {
             stockData: quote,
             chartData: chartData,
             smaData: smaData,
+            rsiData: rsiData,
         };
     } catch (error) {
         console.error(error);
@@ -64,6 +69,7 @@ export async function load({ params }) {
             stockData: undefined,
             chartData: [],
             smaData: [],
+            rsiData: [],
             error: 'Failed to fetch stock data.'
         };
     }
