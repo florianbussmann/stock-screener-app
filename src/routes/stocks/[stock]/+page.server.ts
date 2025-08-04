@@ -1,36 +1,28 @@
 import { yahooFinance } from "$lib/yahoo";
 import { RSI, SMA } from 'technicalindicators';
+import type { Indicator } from "technicalindicators/declarations/indicator/indicator.js";
 
-function calculateSMA(chartData: any, period: number) {
+function alignIndicatorToTime(indicatorValues: number[], chartData: any, offset: number) {
+    return indicatorValues.map((value: number, idx: number) => ({
+        time: chartData[idx + offset].time,
+        value: parseFloat(value.toFixed(2)),
+    }));
+}
+
+function calculateIndicator(indicator: typeof Indicator, chartData: any, period: number, offset: number = period) {
     const closes = chartData.map((point: { time: string, value: number; }) => point.value);
 
-    const smaValues = SMA.calculate({ period: period, values: closes });
+    const indicatorValues = indicator.calculate({ period: period, values: closes });
 
-    const smaChartData = smaValues.map((sma, idx) => {
-        const time = chartData[idx + period - 1].time;
-        return {
-            time,
-            value: parseFloat(sma.toFixed(2)),
-        };
-    });
+    return alignIndicatorToTime(indicatorValues, chartData, offset);
+}
 
-    return smaChartData;
+function calculateSMA(chartData: any, period: number) {
+    return calculateIndicator(SMA, chartData, period, period - 1);
 }
 
 function calculateRSI(chartData: any, period: number) {
-    const closes = chartData.map((point: { time: string, value: number; }) => point.value);
-
-    const rsiValues = RSI.calculate({ period: period, values: closes });
-
-    const rsiChartData = rsiValues.map((rsi, idx) => {
-        const time = chartData[idx + period].time;
-        return {
-            time,
-            value: parseFloat(rsi.toFixed(2)),
-        };
-    });
-
-    return rsiChartData;
+    return calculateIndicator(RSI, chartData, period);
 }
 
 export async function load({ params }) {
@@ -57,7 +49,6 @@ export async function load({ params }) {
                 value: q.close!,                         // or q.adjclose if you prefer
             }));
         const smaData = calculateSMA(chartData, 200);
-        // const smaData = SMA.calculate(chartData);
         const rsiData = calculateRSI(chartData, 14);
 
         return {
