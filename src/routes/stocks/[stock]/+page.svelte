@@ -1,13 +1,15 @@
 <script lang="ts">
     import * as Card from "$lib/components/ui/card/index.js";
     import { onMount } from "svelte";
-    import { createChart, LineSeries } from "lightweight-charts";
     import { Button } from "$lib/components/ui/button";
     import PlusIcon from "@lucide/svelte/icons/plus";
+    import { addToWatchlist, isInWatchlist } from "$lib/stores/watchlist";
     import {
-        addToWatchlist,
-        isInWatchlist,
-    } from "$lib/stores/watchlist";
+        createChart,
+        LineSeries,
+        type IChartApi,
+        type MouseEventParams,
+    } from "lightweight-charts";
 
     const formatPercent = (value: number) => formatChange(value) + " %";
     const formatChange = (value: number) =>
@@ -21,13 +23,15 @@
     let watched = $state(false);
 
     let chartContainer: HTMLDivElement | undefined = $state();
+    let rsiChartContainer: HTMLDivElement | undefined = $state();
 
     onMount(() => {
         if (!chartContainer) return;
+        if (!rsiChartContainer) return;
 
         const chart = createChart(chartContainer, {
             width: chartContainer.clientWidth,
-            height: 400,
+            height: 300,
             layout: {
                 background: { color: "#ffffff" },
                 textColor: "#1e293b",
@@ -52,20 +56,105 @@
             title: "SMA200",
         });
 
+        const rsiChart = createChart(rsiChartContainer, {
+            width: rsiChartContainer.clientWidth,
+            height: 200,
+            layout: {
+                background: { color: "#ffffff" },
+                textColor: "#1e293b",
+            },
+            grid: {
+                vertLines: { color: "#e2e8f0" },
+                horzLines: { color: "#e2e8f0" },
+            },
+        });
+
+        const rsiSeries = rsiChart.addSeries(LineSeries);
+        rsiSeries.applyOptions({
+            color: "purple",
+            lineWidth: 2,
+            title: "RSI",
+        });
+
+        // Add horizontal "line" at RSI = 70
+        const rsi70Series = rsiChart.addSeries(LineSeries);
+        rsi70Series.applyOptions({
+            color: "red",
+            lineStyle: 2,
+            lineWidth: 1,
+        });
+        rsi70Series.setData(
+            data.rsiData.map((d) => ({ time: d.time, value: 70 })),
+        );
+
+        // Add horizontal "line" at RSI = 30
+        const rsi30Series = rsiChart.addSeries(LineSeries);
+        rsi30Series.applyOptions({
+            color: "green",
+            lineStyle: 2,
+            lineWidth: 1,
+        });
+        rsi30Series.setData(
+            data.rsiData.map((d) => ({ time: d.time, value: 30 })),
+        );
+
+        // https://tradingview.github.io/lightweight-charts/tutorials/how_to/set-crosshair-position#syncing-two-charts
+        chart.timeScale().subscribeVisibleTimeRangeChange((timeRange) => {
+            if (timeRange) {
+                rsiChart.timeScale().setVisibleRange(timeRange);
+            }
+        });
+        rsiChart.timeScale().subscribeVisibleTimeRangeChange((timeRange) => {
+            if (timeRange) {
+                chart.timeScale().setVisibleRange(timeRange);
+            }
+        });
+
+        function getCrosshairDataPoint(series: any, param: MouseEventParams) {
+            if (!param.time) {
+                return null;
+            }
+            const dataPoint = param.seriesData.get(series);
+            return dataPoint || null;
+        }
+
+        function syncCrosshair(chart: IChartApi, series: any, dataPoint: any) {
+            if (dataPoint) {
+                chart.setCrosshairPosition(
+                    dataPoint.value,
+                    dataPoint.time,
+                    series,
+                );
+                return;
+            }
+            chart.clearCrosshairPosition();
+        }
+        chart.subscribeCrosshairMove((param) => {
+            const dataPoint = getCrosshairDataPoint(series, param);
+            syncCrosshair(rsiChart, rsiSeries, dataPoint);
+        });
+        rsiChart.subscribeCrosshairMove((param) => {
+            const dataPoint = getCrosshairDataPoint(rsiSeries, param);
+            syncCrosshair(chart, series, dataPoint);
+        });
+
         $effect(() => {
             series.setData(data.chartData);
             smaSeries.setData(data.smaData);
+            rsiSeries.setData(data.rsiData);
             watched = isInWatchlist(data.props?.symbol);
         });
 
         const resizeObserver = new ResizeObserver(() => {
             chart.applyOptions({ width: chartContainer?.clientWidth });
+            rsiChart.applyOptions({ width: chartContainer?.clientWidth });
         });
         resizeObserver.observe(chartContainer);
 
         return () => {
             resizeObserver.disconnect();
             chart.remove();
+            rsiChart.remove();
         };
     });
 </script>
@@ -151,7 +240,12 @@
             <div
                 bind:this={chartContainer}
                 class="w-full"
-                style="height: 400px;"
+                style="height: 300px;"
+            ></div>
+            <div
+                bind:this={rsiChartContainer}
+                class="w-full"
+                style="height: 200px;"
             ></div>
         </Card.Content>
     </Card.Root>
