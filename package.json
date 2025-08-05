@@ -18,6 +18,7 @@
 		"@sveltejs/kit": "^2.22.0",
 		"@sveltejs/vite-plugin-svelte": "^6.0.0",
 		"@tailwindcss/vite": "^4.0.0",
+		"@tanstack/table-core": "^8.21.3",
 		"bits-ui": "^2.9.1",
 		"clsx": "^2.1.1",
 		"svelte": "^5.0.0",
@@ -36,6 +37,7 @@
 	},
 	"dependencies": {
 		"@sveltejs/adapter-vercel": "^5.8.1",
+		"@tabler/icons-svelte": "^3.34.1",
 		"@vite-pwa/sveltekit": "^1.0.0",
 		"lightweight-charts": "^5.0.8",
 		"yahoo-finance2": "^3.5.0"

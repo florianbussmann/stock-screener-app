@@ -83,43 +83,46 @@
 			<Command.Empty>Searching..</Command.Empty>
 		{:then quotes}
 			<Command.Empty>No results found.</Command.Empty>
-			{#if search === '' && $watchlist.length > 0}
+			{#if search === "" && $watchlist.length > 0}
 				<Command.Group heading="Watchlist">
 					{#each $watchlist as symbol}
-						<Command.Item onclick={() => {
-							searchOpen.set(false);
-							goto(`/stocks/${symbol}`);
-						}}>{symbol}</Command.Item>
+						<Command.Item
+							onclick={() => {
+								searchOpen.set(false);
+								goto(`/stocks/${symbol}`);
+							}}>{symbol}</Command.Item
+						>
 					{/each}
 				</Command.Group>
 			{:else}
-			<Command.Group>
-				{#each quotes as quote}
-					<Command.Item
-						class="flex justify-between items-center"
-						onclick={() => {
-							searchOpen.set(false);
-							goto(`/stocks/${quote.symbol}`);
-						}}
-						value={quote.symbol + " " + quote.shortname}
-					>
-						<div class="flex flex-col">
-							<span class="font-semibold">{quote.symbol}</span>
-							<span class="text-sm text-muted-foreground">
-								{quote.longname}
-							</span>
-						</div>
-						{#if isInWatchlist(quote.symbol)}
-							<div
-								class="flex items-center gap-1 text-sm font-medium"
-							>
-								<BookMarkedIcon />
-								<span>Watching</span>
+				<Command.Group>
+					{#each quotes as quote}
+						<Command.Item
+							class="flex justify-between items-center"
+							onclick={() => {
+								searchOpen.set(false);
+								goto(`/stocks/${quote.symbol}`);
+							}}
+							value={quote.symbol + " " + quote.shortname}
+						>
+							<div class="flex flex-col">
+								<span class="font-semibold">{quote.symbol}</span
+								>
+								<span class="text-sm text-muted-foreground">
+									{quote.longname}
+								</span>
 							</div>
-						{/if}</Command.Item
-					>
-				{/each}
-			</Command.Group>
+							{#if isInWatchlist(quote.symbol)}
+								<div
+									class="flex items-center gap-1 text-sm font-medium"
+								>
+									<BookMarkedIcon />
+									<span>Watching</span>
+								</div>
+							{/if}</Command.Item
+						>
+					{/each}
+				</Command.Group>
 			{/if}
 		{:catch error}
 			<p style="color: red">{error.message}</p>
