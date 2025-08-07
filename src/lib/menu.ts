@@ -6,6 +6,10 @@ export interface MenuItem {
 
 export const menuItems: MenuItem[] = [
     {
+        name: 'Trades',
+        path: '/trades',
+    },
+    {
         name: 'Watchlist',
         path: '/watchlist',
     },

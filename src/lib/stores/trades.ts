@@ -3,7 +3,7 @@ import { writable } from 'svelte/store';
 
 const LOCAL_STORAGE_KEY = 'trades';
 
-function loadTrades(): Trade[] {
+export function loadTrades(): Trade[] {
     if (typeof localStorage === 'undefined') return [];
     try {
         const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
