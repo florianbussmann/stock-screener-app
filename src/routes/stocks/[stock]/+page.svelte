@@ -179,8 +179,10 @@
     import { v4 as uuid } from "uuid";
     import { trades } from "$lib/stores/trades";
 
+    let currentPrice = getCurrentPrice(data.stockData);
+
     let shares: number | undefined = $state();
-    let price = $state(data.stockData?.regularMarketPrice || 0);
+    let price = $state(currentPrice || 0);
     let date = $state<DateValue>();
     let type: TradeType = "buy";
 
@@ -201,6 +203,7 @@
 
     import { breadcrumbStore } from "$lib/stores/breadcrumb";
     import { afterNavigate } from "$app/navigation";
+    import { getCurrentPrice } from "$lib/performance.js";
 
     afterNavigate(() => {
         breadcrumbStore.set([
@@ -336,7 +339,7 @@
                 <div>
                     <div class="text-sm text-gray-500">Price</div>
                     <div class="text-xl font-bold">
-                        {data.stockData.regularMarketPrice}
+                        {currentPrice}
                         {data.stockData.currency}
                     </div>
                 </div>
@@ -344,11 +347,19 @@
                     <div class="text-sm text-gray-500">Today +/-</div>
                     <div
                         class="text-lg font-semibold {(data.stockData
-                            .regularMarketChange ?? 0) >= 0
+                            .preMarketChange ??
+                            data.stockData.postMarketChange ??
+                            data.stockData.regularMarketChange ??
+                            0) >= 0
                             ? 'text-emerald-600'
                             : 'text-red-600'}"
                     >
-                        {formatChange(data.stockData.regularMarketChange ?? 0)}
+                        {formatChange(
+                            data.stockData.preMarketChange ??
+                                data.stockData.postMarketChange ??
+                                data.stockData.regularMarketChange ??
+                                0,
+                        )}
                         {data.stockData?.currency}
                     </div>
                 </div>
@@ -356,12 +367,18 @@
                     <div class="text-sm text-gray-500">Today %</div>
                     <div
                         class="text-lg font-semibold text-{(data.stockData
-                            .regularMarketChangePercent ?? 0) >= 0
+                            .preMarketChangePercent ??
+                            data.stockData.postMarketChangePercent ??
+                            data.stockData.regularMarketChangePercent ??
+                            0) >= 0
                             ? 'emerald'
                             : 'red'}-600"
                     >
                         {formatPercent(
-                            data.stockData.regularMarketChangePercent ?? 0,
+                            data.stockData.preMarketChangePercent ??
+                                data.stockData.postMarketChangePercent ??
+                                data.stockData.regularMarketChangePercent ??
+                                0,
                         )}
                     </div>
                 </div>

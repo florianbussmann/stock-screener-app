@@ -2,11 +2,13 @@ import { json } from '@sveltejs/kit';
 import { yahooFinance } from "$lib/yahoo";
 
 import { type Trade } from '$lib/schema.js';
+import { getCurrentPrice } from '$lib/performance';
 
 export async function POST({ request }) {
     const trade: Trade = await request.json();
     try {
-        const currentPrice = (await yahooFinance.quote(trade.symbol)).regularMarketPrice;
+        const quote = (await yahooFinance.quote(trade.symbol))
+        const currentPrice = getCurrentPrice(quote);
 
         if (currentPrice) {
             const capitalGain = (currentPrice - trade.price) * trade.shares;
