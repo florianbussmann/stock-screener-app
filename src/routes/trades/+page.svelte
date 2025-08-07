@@ -3,6 +3,15 @@
     import * as Card from "$lib/components/ui/card";
 
     import DataTable from "./data-table.svelte";
+
+    import { onMount } from "svelte";
+    import { type Trade } from "$lib/schema";
+
+    let trades : Trade[] = [];
+
+    onMount(async () => {
+        trades = loadTrades();
+    });
 </script>
 
 <Card.Root>
@@ -11,6 +20,7 @@
         <Card.Description>Your traded stocks</Card.Description>
     </Card.Header>
     <Card.Content>
-        <DataTable data={loadTrades()} />
+        <DataTable data={trades} />
     </Card.Content>
 </Card.Root>
+

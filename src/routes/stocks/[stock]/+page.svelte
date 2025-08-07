@@ -166,12 +166,12 @@
     import { v4 as uuid } from "uuid";
     import { trades } from "$lib/stores/trades";
 
-    let shares = $state();
+    let shares : number | undefined = $state();
     let price = $state(data.stockData?.regularMarketPrice || 0);
     let type: TradeType = "buy";
 
     function addTrade() {
-        if (typeof shares === "number") {
+        if (typeof shares !== "undefined") {
             const trade: Trade = {
                 id: uuid(),
                 symbol: data.props.symbol,

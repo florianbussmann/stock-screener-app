@@ -6,15 +6,24 @@
         renderSnippet,
     } from "$lib/components/ui/data-table/index.js";
     import * as Table from "$lib/components/ui/table/index.js";
-    import type { WatchlistEntry } from "$lib/schema";
+    import type { Trade } from "$lib/schema";
 
     import type { ColumnMeta, Row } from "@tanstack/table-core";
+    import { computeTradeReturn } from "$lib/performance";
     // Extend the meta interface
     export interface ExtendedMeta extends ColumnMeta<any, any> {
         class?: string;
     }
 
-    export const columns: ColumnDef<WatchlistEntry>[] = [
+    const formatPercent = (value: number) => formatChange(value) + " %";
+    const formatChange = (value: number) =>
+        (value > 0 ? "+" : "") +
+        new Intl.NumberFormat("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(value);
+
+    export const columns: ColumnDef<Trade>[] = [
         {
             accessorKey: "type",
             header: "Type",
@@ -33,12 +42,20 @@
             header: "Price",
         },
         {
+            accessorKey: "performance",
+            header: "Performance",
+            cell: ({ row }) => renderSnippet(DataTablePerformance, { row }),
+            meta: {
+                class: "text-right w-[1%] whitespace-nowrap",
+            },
+        },
+        {
             accessorKey: "date",
-            header: "Timestamp"
-        }
+            header: "Timestamp",
+        },
     ];
 
-    let { data }: { data: WatchlistEntry[] } = $props();
+    let { data }: { data: Trade[] } = $props();
 
     const table = createSvelteTable({
         get data() {
@@ -49,12 +66,30 @@
     });
 </script>
 
-{#snippet DataTableSymbol({ row }: { row: Row<WatchlistEntry> })}
+{#snippet DataTableSymbol({ row }: { row: Row<Trade> })}
     <div class="w-16">
         <a
             class="text-blue-700 hover:underline"
             href="/stocks/{row.original.symbol}">{row.original.symbol}</a
         >
+    </div>
+{/snippet}
+
+{#snippet DataTablePerformance({ row }: { row: Row<Trade> })}
+    <div class="text-right">
+        {#await computeTradeReturn(row.original)}
+            N/A
+        {:then tradeReturn}
+            <div
+                class="font-semibold text-{(tradeReturn.capitalReturnPercent ?? 0) >= 0
+                    ? 'emerald'
+                    : 'red'}-600"
+            >
+                {formatPercent(tradeReturn.capitalReturnPercent)}
+            </div>
+        {:catch error}
+            N/A
+        {/await}
     </div>
 {/snippet}
 
