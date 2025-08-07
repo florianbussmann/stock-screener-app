@@ -14,6 +14,19 @@
     import * as Dialog from "$lib/components/ui/dialog/index.js";
     import { Input } from "$lib/components/ui/input/index.js";
     import { Label } from "$lib/components/ui/label/index.js";
+    import CalendarIcon from "@lucide/svelte/icons/calendar";
+    import {
+        type DateValue,
+        DateFormatter,
+        getLocalTimeZone,
+    } from "@internationalized/date";
+    import { cn } from "$lib/utils.js";
+    import { Calendar } from "$lib/components/ui/calendar/index.js";
+    import * as Popover from "$lib/components/ui/popover/index.js";
+
+    const df = new DateFormatter("en-US", {
+        dateStyle: "long",
+    });
 
     const formatPercent = (value: number) => formatChange(value) + " %";
     const formatChange = (value: number) =>
@@ -166,8 +179,9 @@
     import { v4 as uuid } from "uuid";
     import { trades } from "$lib/stores/trades";
 
-    let shares : number | undefined = $state();
+    let shares: number | undefined = $state();
     let price = $state(data.stockData?.regularMarketPrice || 0);
+    let date = $state<DateValue>();
     let type: TradeType = "buy";
 
     function addTrade() {
@@ -177,7 +191,7 @@
                 symbol: data.props.symbol,
                 shares,
                 price,
-                date: new Date().toISOString(),
+                date: date?.toString() || new Date().toISOString(),
                 type,
             };
 
@@ -238,6 +252,49 @@
                                         bind:value={price}
                                         class="col-span-3"
                                     />
+                                </div>
+
+                                <div
+                                    class="grid grid-cols-4 items-center gap-4"
+                                >
+                                    <Label for="date" class="text-left"
+                                        >Date</Label
+                                    >
+                                    <Popover.Root>
+                                        <Popover.Trigger>
+                                            {#snippet child({ props })}
+                                                <div class="group">
+                                                    <Button
+                                                        variant="outline"
+                                                        class={cn(
+                                                            "w-[280px] justify-start text-left font-normal",
+                                                            !date &&
+                                                                "text-muted-foreground",
+                                                        )}
+                                                        {...props}
+                                                    >
+                                                        <CalendarIcon
+                                                            class="mr-2 size-4"
+                                                        />
+                                                        {date
+                                                            ? df.format(
+                                                                  date.toDate(
+                                                                      getLocalTimeZone(),
+                                                                  ),
+                                                              )
+                                                            : "Select a date"}
+                                                    </Button>
+                                                </div>
+                                            {/snippet}
+                                        </Popover.Trigger>
+                                        <Popover.Content class="w-auto p-0">
+                                            <Calendar
+                                                bind:value={date}
+                                                type="single"
+                                                initialFocus
+                                            />
+                                        </Popover.Content>
+                                    </Popover.Root>
                                 </div>
                             </div>
                             <Dialog.Footer>
