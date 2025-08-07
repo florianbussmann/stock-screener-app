@@ -5,27 +5,21 @@
     import { Kbd } from "$lib/components/ui/kbd";
     import CommandIcon from "@lucide/svelte/icons/command";
 
-    import { onMount } from "svelte";
     import { afterNavigate } from "$app/navigation";
     import { page } from "$app/state";
     import { menuItems } from "$lib/menu.js";
     import { findBreadcrumb } from "$lib/breadcrumb.js";
     import * as Breadcrumb from "$lib/components/ui/breadcrumb/index.js";
+    import { breadcrumbStore } from "$lib/stores/breadcrumb";
 
     // Store breadcrumb in reactive variable
-    let breadcrumb: string | any[] = [];
     let defaultBreadcrumb = [{ name: "Home", path: "/" }];
-
-    // On initial mount
-    onMount(() => {
-        breadcrumb =
-            findBreadcrumb(page.route.id || "", menuItems) || defaultBreadcrumb;
-    });
 
     // On client-side navigation
     afterNavigate(() => {
-        breadcrumb =
-            findBreadcrumb(page.route.id || "", menuItems) || defaultBreadcrumb;
+        breadcrumbStore.set(
+            findBreadcrumb(page.route.id || "", menuItems) || defaultBreadcrumb,
+        );
     });
 
     import { searchOpen } from "$lib/stores/search";
@@ -42,10 +36,10 @@
         />
         <Breadcrumb.Root>
             <Breadcrumb.List>
-                {#each breadcrumb as item, i}
-                    {#if i < breadcrumb.length - 1}
+                {#each $breadcrumbStore as item, i}
+                    {#if i < $breadcrumbStore.length - 1}
                         <Breadcrumb.Item class="hidden md:block">
-                            <Breadcrumb.Link href="{item.path}"
+                            <Breadcrumb.Link href={item.path}
                                 >{item.name}</Breadcrumb.Link
                             >
                         </Breadcrumb.Item>
