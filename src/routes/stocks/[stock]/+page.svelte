@@ -198,6 +198,19 @@
             trades.add(trade);
         }
     }
+
+    import { breadcrumbStore } from "$lib/stores/breadcrumb";
+    import { afterNavigate } from "$app/navigation";
+
+    afterNavigate(() => {
+        breadcrumbStore.set([
+            { name: "Stocks", path: "/stocks" },
+            {
+                name: data.stockData?.displayName || data.props.symbol,
+                path: `/stocks/${data.props.symbol}`,
+            },
+        ]);
+    });
 </script>
 
 {#if data.stockData}
