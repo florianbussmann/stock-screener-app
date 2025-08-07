@@ -11,6 +11,10 @@
         type MouseEventParams,
     } from "lightweight-charts";
 
+    import * as Dialog from "$lib/components/ui/dialog/index.js";
+    import { Input } from "$lib/components/ui/input/index.js";
+    import { Label } from "$lib/components/ui/label/index.js";
+
     const formatPercent = (value: number) => formatChange(value) + " %";
     const formatChange = (value: number) =>
         (value > 0 ? "+" : "") +
@@ -157,6 +161,29 @@
             rsiChart.remove();
         };
     });
+
+    import type { Trade, TradeType } from "$lib/schema.js";
+    import { v4 as uuid } from "uuid";
+    import { trades } from "$lib/stores/trades";
+
+    let shares = $state();
+    let price = $state(data.stockData?.regularMarketPrice || 0);
+    let type: TradeType = "buy";
+
+    function addTrade() {
+        if (typeof shares === "number") {
+            const trade: Trade = {
+                id: uuid(),
+                symbol: data.props.symbol,
+                shares,
+                price,
+                date: new Date().toISOString(),
+                type,
+            };
+
+            trades.add(trade);
+        }
+    }
 </script>
 
 {#if data.stockData}
@@ -170,16 +197,69 @@
                 </Card.Description>
             </div>
 
-            <Button
-                size="sm"
-                onclick={() => {
-                    addToWatchlist(data.props?.symbol);
-                    watched = true;
-                }}
-                disabled={watched}
-            >
-                <PlusIcon class="w-4 h-4" />Watch</Button
-            >
+            <div>
+                <Dialog.Root>
+                    <Dialog.Trigger>
+                        <Button size="sm">
+                            <PlusIcon class="w-4 h-4" />Buy</Button
+                        ></Dialog.Trigger
+                    >
+                    <Dialog.Content class="sm:max-w-[425px]">
+                        <Dialog.Header>
+                            <Dialog.Title>Buy {data.props.symbol}</Dialog.Title>
+                        </Dialog.Header>
+                        <form
+                            onsubmit={() => {
+                                addTrade();
+                            }}
+                        >
+                            <div class="grid gap-4 py-4">
+                                <div
+                                    class="grid grid-cols-4 items-center gap-4"
+                                >
+                                    <Label for="shares" class="text-right"
+                                        >Shares</Label
+                                    >
+                                    <Input
+                                        id="shares"
+                                        bind:value={shares}
+                                        class="col-span-3"
+                                    />
+                                </div>
+                                <div
+                                    class="grid grid-cols-4 items-center gap-4"
+                                >
+                                    <Label for="price" class="text-left"
+                                        >Price ({data.stockData
+                                            .currency})</Label
+                                    >
+                                    <Input
+                                        id="price"
+                                        bind:value={price}
+                                        class="col-span-3"
+                                    />
+                                </div>
+                            </div>
+                            <Dialog.Footer>
+                                <Dialog.Close>
+                                    <Button type="submit">Save trade</Button>
+                                </Dialog.Close>
+                            </Dialog.Footer>
+                        </form>
+                    </Dialog.Content>
+                </Dialog.Root>
+
+                <Button
+                    size="sm"
+                    onclick={() => {
+                        addToWatchlist(data.props?.symbol);
+                        watched = true;
+                    }}
+                    disabled={watched}
+                >
+                    <PlusIcon class="w-4 h-4" />Watch</Button
+                >
+            </div>
         </Card.Header>
         <Card.Content>
             <div class="grid grid-cols-5">
