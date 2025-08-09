@@ -28,14 +28,6 @@
         dateStyle: "long",
     });
 
-    const formatPercent = (value: number) => formatChange(value) + " %";
-    const formatChange = (value: number) =>
-        (value > 0 ? "+" : "") +
-        new Intl.NumberFormat("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        }).format(value);
-
     let { data } = $props();
     let watched = $state(false);
 
@@ -204,6 +196,7 @@
     import { breadcrumbStore } from "$lib/stores/breadcrumb";
     import { afterNavigate } from "$app/navigation";
     import { getCurrentPrice } from "$lib/performance.js";
+    import { formatChange, formatPercent } from "$lib/formatter.js";
 
     afterNavigate(() => {
         breadcrumbStore.set([

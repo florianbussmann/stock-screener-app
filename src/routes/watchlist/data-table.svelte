@@ -10,6 +10,8 @@
     import type { WatchlistEntry } from "$lib/schema";
     import DataTableActions from "./data-table-actions.svelte";
 
+    import { formatChange, formatPercent } from "$lib/formatter.js";
+
     import type { ColumnMeta, Row } from "@tanstack/table-core";
     // Extend the meta interface
     export interface ExtendedMeta extends ColumnMeta<any, any> {
@@ -28,11 +30,31 @@
         }
     }
 
+    async function fetchFairValueGap(symbol: string) {
+        const response = await fetch(
+            `/api/valuation/fair-value-gap?symbol=${encodeURIComponent(symbol)}`,
+        );
+
+        if (response.ok) {
+            return await response.json();
+        } else {
+            return [];
+        }
+    }
+
     export const columns: ColumnDef<WatchlistEntry>[] = [
         {
             accessorKey: "symbol",
             header: "Symbol",
             cell: ({ row }) => renderSnippet(DataTableSymbol, { row }),
+        },
+        {
+            accessorKey: "fvg",
+            header: "Fair Value Gap",
+            cell: ({ row }) => renderSnippet(DataTableFairValueGap, { row }),
+            meta: {
+                class: "text-right w-[1%] whitespace-nowrap",
+            },
         },
         {
             accessorKey: "rsi",
@@ -73,6 +95,39 @@
             class="text-blue-700 hover:underline"
             href="/stocks/{row.original.symbol}">{row.original.symbol}</a
         >
+    </div>
+{/snippet}
+
+{#snippet DataTableFairValueGap({ row }: { row: Row<WatchlistEntry> })}
+    <div class="text-right">
+        {#await fetchFairValueGap(row.original.symbol)}
+            N/A
+        {:then valuation}
+            <div class="group">
+                <div
+                    class="font-mono {valuation.fairValueGap > 0
+                        ? 'text-emerald-600'
+                        : valuation.fairValueGap < 0
+                          ? 'text-red-600'
+                          : 'text-gray-600'}"
+                >
+                    {formatChange(valuation.fairValueGap)}
+                    {valuation.currency}
+                </div>
+
+                <div
+                    class="font-mono {valuation.fairValueGap > 0
+                        ? 'text-emerald-600'
+                        : valuation.fairValueGap < 0
+                          ? 'text-red-600'
+                          : 'text-gray-600'}"
+                >
+                    {formatPercent(valuation.fairValueGapPercent)}
+                </div>
+            </div>
+        {:catch error}
+            N/A {error}
+        {/await}
     </div>
 {/snippet}
 
