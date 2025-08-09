@@ -16,11 +16,31 @@
         class?: string;
     }
 
+    async function fetchRSI(symbol: string) {
+        const response = await fetch(
+            `/api/indicators/rsi?symbol=${encodeURIComponent(symbol)}`,
+        );
+
+        if (response.ok) {
+            return (await response.json()).rsi;
+        } else {
+            return [];
+        }
+    }
+
     export const columns: ColumnDef<WatchlistEntry>[] = [
         {
             accessorKey: "symbol",
             header: "Symbol",
             cell: ({ row }) => renderSnippet(DataTableSymbol, { row }),
+        },
+        {
+            accessorKey: "rsi",
+            header: "RSI",
+            cell: ({ row }) => renderSnippet(DataTableRSI, { row }),
+            meta: {
+                class: "text-right w-[1%] whitespace-nowrap",
+            },
         },
         {
             id: "actions",
@@ -53,6 +73,26 @@
             class="text-blue-700 hover:underline"
             href="/stocks/{row.original.symbol}">{row.original.symbol}</a
         >
+    </div>
+{/snippet}
+
+{#snippet DataTableRSI({ row }: { row: Row<WatchlistEntry> })}
+    <div class="text-right">
+        {#await fetchRSI(row.original.symbol)}
+            N/A
+        {:then indicator}
+            <div
+                class="font-mono {indicator < 30
+                    ? 'text-emerald-600'
+                    : indicator > 70
+                      ? 'text-red-600'
+                      : 'text-purple-600'}"
+            >
+                {indicator}
+            </div>
+        {:catch error}
+            N/A {error}
+        {/await}
     </div>
 {/snippet}
 
